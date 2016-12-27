@@ -1,10 +1,30 @@
 import React from 'react';
 import style from './style.css';
-
+import io from 'socket.io-client';
+import { withRouter } from 'react-router';
 
 class chat extends React.Component{
+
+    
+    constructor(props){
+        super(props);
+
+        this.state={
+            message:[]
+        };
+    }
+    
+        getMessage(messagereceived){
+            this.setState({
+                message:this.state.message.concat(messagereceived)
+            })
+           console.log(messagereceived);
+        }
+
     render(){
-        return(
+   
+        
+    return(
 
       <div>
           <div className="container bootstrap snippet">
@@ -14,12 +34,10 @@ class chat extends React.Component{
                 <div className="chat-message">
                   <ul className="chat">
                    
-                    <Left name="Sigma" time="10" message="asdhjashsajdhjskdhfjskdhfjksdhfjksdhfjksdhjklfhsdkfhdfhjdlsddjfjshafhfdjshjdhfkssfd hdhjddsThis is working"/>
-                    <Right name="web" time="12" message="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare dolor, quis ullamcorper ligula sodales at. " />
-                                        
+                   <InputArea updateChat={this.getMessage.bind(this)} />
+                     {this.state.message}
                   </ul>
                 </div>
-                <InputArea/>
               </div>        
             </div>
           </div>
@@ -31,13 +49,38 @@ class chat extends React.Component{
 }
 
 class InputArea extends React.Component{
+    
+    constructor(props){
+        super(props);
+
+        this.state={
+            message:""
+        };
+    }
+  
+    updateMessage(e){
+        this.setState({
+            message:e.target.value
+        })
+    }
+    
+    sendMessage(e){
+        
+        this.props.updateChat(<Right message={this.state.message}/>);
+        
+        this.setState({
+            message:""
+        })
+    }
+    
     render(){
+        
         return(
             <div className="chat-box bg-white">
                   <div className="input-group">
-                    <input className="form-control border no-shadow no-rounded" placeholder="Type your message here" />
+                    <input value={this.state.message} onChange={this.updateMessage.bind(this)} className="form-control border no-shadow no-rounded" placeholder="Type your message here" />
                     <span className="input-group-btn">
-                      <button className="btn btn-success no-rounded" type="button">Send</button>
+                      <button onClick={this.sendMessage.bind(this)} className="btn btn-success no-rounded" type="button">Send</button>
                     </span>
                   </div>
                 </div>
@@ -78,8 +121,8 @@ class Right extends React.Component{
                </span>
                <div className="chat-body clearfix">
                  <div className="header">
-                   <strong className="primary-font">{this.props.name}</strong>
-                   <small className="pull-right text-muted"><i className="fa fa-clock-o" />  {this.props.time} min ago</small>
+                   <strong className="primary-font">Name</strong>
+                   <small className="pull-right text-muted"><i className="fa fa-clock-o" />  10 min ago</small>
                  </div>
                  <p>
                    "{this.props.message}"

@@ -1,54 +1,59 @@
 import React from 'react';
 import style from './style.css';
-import jquery from 'jquery';
 import io from 'socket.io-client';
-import {browserHistory} from 'react-router';
+import { withRouter } from 'react-router';
 
 let socket=io();
-let $=jquery;
 
 class createRoom extends React.Component{
     
-    componentDidMount() {
+    constructor(props){
+        super(props);
         
-        $(()=>{
-
-            //create room
-
-            var create_form=$('.create_form');
-
-            create_form.submit(function(e){
-                var name=$('input[name=name]').val();
-                var type=$('input[name=type]:checked').val();
-                e.preventDefault();
-                if(type=='private')
-                    socket.emit('join_private',name);
-                else
-                    socket.emit('join_public',name);
-            })
-
-            socket.on('joined',function(){
-                console.log("redirect");
-                browserHistory.push('/'+name);
-            })
-
-            //create room end
-        })
+        this.state={
+            room:"",
+            type:""
+        };
+    }
     
-    }   
+    onFormSend(e){
+        e.preventDefault();
+        console.log(this.state);
+        
+         var room=this.state.room;
+         var type=this.state.type;
+        if(type=='private')
+            socket.emit('join_private',room);
+        else
+            socket.emit('join_public',room);
+        
+        this.props.router.push('/'+room);
+    }
+    
+    setType(e){
+        this.setState({
+            type:e.target.value
+        });
+    }
+    
+    setName(e){
+        this.setState({
+            room:e.target.value
+        });
+    }
     
     render(){
         return(
     <div>
         <div className="container">
 
-            <form className="form-inline create_form text-center">
+            <form method="post" className="form-inline create_form text-center" onSubmit={this.onFormSend.bind(this)}>
                 <h3 className="title">Create and Join Room</h3>
                 <div className="form-group">
-                    <input placeholder="Enter Room Name" type="text" className="form-control" name="name" id="name" required />
+                    <input onChange={this.setName.bind(this)} value={this.state.room} placeholder="Enter Room Name" type="text" className="form-control" name="name" id="name" required />
                 </div>
-                <input type="radio" name="type" value="public" required />public
-                <input type="radio" name="type" value="private" required />private
+                <input type="radio" name="type" value="public" required checked={this.state.type==='public'} onChange={this.setType.bind(this)}/>public
+                <input type="radio" name="type" value="private" required checked={this.state.type==='private'} onChange={this.setType.bind(this)}/>private
                 <button type="submit" className="btn btn-primary">Create</button>
             </form>
 
